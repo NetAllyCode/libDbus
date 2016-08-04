@@ -27,6 +27,8 @@
 
 package cx.ath.matthew.debug;
 
+import android.util.Log;
+
 import cx.ath.matthew.utils.Hexdump;
 
 import java.io.File;
@@ -580,16 +582,41 @@ public class Debug
    {
       filterMap.put(c, f);
    }
-   private static void _print(Class c, int level, String loc, String extra, String message, String[] lines)
-   {
-      //TODO 1.5: FilterCommand f = filterMap.get(c);
-      FilterCommand f = (FilterCommand) filterMap.get(c);
-      if (null == f) {
-         debugout.println("["+loc+"] " +extra + message);
-         if (null != lines)
-            for (String s: lines)
-               debugout.println(s);
-      } else
-         f.filter(debugout, level, loc, extra, message, lines);
+
+   final static String DBUS = "DBUS";
+
+   private static void _print(Class c, int level, String loc, String extra, String message, String[] lines) {
+      int androidLevel = translateLogLevel(level);
+      if (Log.isLoggable(DBUS, androidLevel)) {
+         String msg = "[" + loc + "] " + extra + message;
+         if (null != lines) {
+            for (String s : lines)
+               msg += "\n" + s;
+         }
+         Log.println(androidLevel, DBUS, msg);
+      }
+   }
+
+   /**
+    * Translate proprietary DBUS level to Android logging level
+    *
+    * @param dbusLevel
+    * @return Android logging level
+    */
+   private static int translateLogLevel(int dbusLevel) {
+      switch (dbusLevel) {
+         case CRIT:
+            return Log.ASSERT;
+         case ERR:
+            return Log.ERROR;
+         case WARN:
+            return Log.WARN;
+         case INFO:
+            return Log.INFO;
+         case DEBUG:
+            return Log.DEBUG;
+         default:
+            return Log.VERBOSE;
+      }
    }
 }
