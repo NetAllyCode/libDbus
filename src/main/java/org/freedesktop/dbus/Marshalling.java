@@ -596,7 +596,7 @@ public class Marshalling
                dsc = (Class<? extends DBusSerializable>) types[i];
             else
                dsc = (Class<? extends DBusSerializable>) ((ParameterizedType) types[i]).getRawType();
-            for (Method m: dsc.getDeclaredMethods()) 
+            for (Method m: dsc.getMethods())
                if (m.getName().equals("deserialize")) {
                   Type[] newtypes = m.getGenericParameterTypes();
                   try {
