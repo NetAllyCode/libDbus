@@ -466,8 +466,8 @@ public abstract class AbstractConnection
    }
    void queueOutgoing(Message m)
    {
+      if (null == outgoing) return;
       synchronized (outgoing) {
-			if (null == outgoing) return;
          outgoing.add(m); 
          if (Debug.debug) Debug.print(Debug.DEBUG, "Notifying outgoing thread");
          outgoing.notifyAll();
