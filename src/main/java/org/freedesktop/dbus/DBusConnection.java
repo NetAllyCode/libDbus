@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.freedesktop.DBus;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -195,7 +197,7 @@ public class DBusConnection extends AbstractConnection
 
    private List<String> busnames;
 
-   private static final Map<Object,DBusConnection> conn = new HashMap<Object,DBusConnection>();
+   private static final ConcurrentMap<Object,DBusConnection> conn = new ConcurrentHashMap<Object,DBusConnection>();
    private int _refcount = 0;
    private Object _reflock = new Object();
    private DBus _dbus;
@@ -210,14 +212,16 @@ public class DBusConnection extends AbstractConnection
       synchronized (conn) {
          DBusConnection c = conn.get(address);
          if (null != c) {
-            synchronized (c._reflock) { c._refcount++; }
-            return c;
+             synchronized (c._reflock) {
+                 if (c.connected) {
+                     c._refcount++;
+                     return c;
+                 }
+             }
          }
-         else {
-            c = new DBusConnection(address);
-            conn.put(address, c);
-            return c;
-         }
+         c = new DBusConnection(address);
+         conn.put(address, c);
+         return c;
       }
    }
    /**
@@ -274,15 +278,17 @@ public class DBusConnection extends AbstractConnection
          DBusConnection c = conn.get(s);
          if (Debug.debug) Debug.print(Debug.VERBOSE, "Getting bus connection for "+s+": "+c);
          if (null != c) {
-            synchronized (c._reflock) { c._refcount++; }
-            return c;
+            synchronized (c._reflock) {
+                if (c.connected) {
+                    c._refcount++;
+                    return c;
+                }
+            }
          }
-         else {
-            if (Debug.debug) Debug.print(Debug.DEBUG, "Creating new bus connection to: "+s);
-            c = new DBusConnection(s);
-            conn.put(s, c);
-            return c;
-         }
+         if (Debug.debug) Debug.print(Debug.DEBUG, "Creating new bus connection to: "+s);
+         c = new DBusConnection(s);
+         conn.put(s, c);
+         return c;
       }
    }
    @SuppressWarnings("unchecked")
@@ -749,7 +755,6 @@ public class DBusConnection extends AbstractConnection
     */
    public void disconnect()
    {
-      synchronized (conn) {
          synchronized (_reflock) {
             if (0 == --_refcount) {
                if (Debug.debug) Debug.print(Debug.INFO, "Disconnecting DBusConnection");
@@ -771,10 +776,9 @@ public class DBusConnection extends AbstractConnection
                   }
                } catch (DBusException DBe) {}
 
-               conn.remove(addr);
+               conn.remove(addr, this);
                super.disconnect();
             }
-         }
       }
    }
 }
