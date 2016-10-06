@@ -40,6 +40,10 @@ import cx.ath.matthew.debug.Debug;
 
 public class Transport
 {
+
+   // Socket timeout
+   public static final int SO_TIMEOUT = 10000;
+
    public static class SASL
    {
       public static class Command
@@ -788,7 +792,8 @@ public class Transport
          } else {
             mode = SASL.MODE_CLIENT;
             s = new Socket();
-            s.connect(new InetSocketAddress(address.getParameter("host"), Integer.parseInt(address.getParameter("port"))));
+            s.connect(new InetSocketAddress(address.getParameter("host"), Integer.parseInt(address.getParameter("port"))), SO_TIMEOUT);
+            s.setSoTimeout(SO_TIMEOUT);
          }
          in = s.getInputStream();
          out = s.getOutputStream();
