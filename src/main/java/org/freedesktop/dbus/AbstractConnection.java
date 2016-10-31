@@ -10,6 +10,8 @@
 */
 package org.freedesktop.dbus;
 
+import android.util.Log;
+
 import static org.freedesktop.dbus.Gettext._;
 
 import java.lang.reflect.InvocationTargetException;
@@ -45,7 +47,10 @@ import cx.ath.matthew.debug.Debug;
  */
 public abstract class AbstractConnection
 {
-   protected class FallbackContainer 
+
+   public static final String TAG = "AbstractConnection";
+
+   protected class FallbackContainer
    {
       private Map<String[], ExportedObject> fallbacks = new HashMap<String[], ExportedObject>();
       public synchronized void add(String path, ExportedObject eo)
@@ -108,8 +113,8 @@ public abstract class AbstractConnection
 
                      m = null;
                   }
-               } catch (Exception e) { 
-                  if (EXCEPTION_DEBUG && Debug.debug) Debug.print(Debug.ERR, e);            
+               } catch (Exception e) {
+                  if (EXCEPTION_DEBUG && Debug.debug) Debug.print(Debug.ERR, e);
                   if (e instanceof FatalException) {
                      disconnect();
                   }
@@ -192,8 +197,11 @@ public abstract class AbstractConnection
                   m = outgoing.remove();
                if (Debug.debug) Debug.print(Debug.DEBUG, "Got message: "+m);
             }
-            if (null != m) 
+            if (null != m) {
                sendMessage(m);
+               Log.i(TAG, ">>> " + m.getName());
+            }
+
             m = null;
          }
 
@@ -822,6 +830,7 @@ public abstract class AbstractConnection
    private void handleMessage(final DBusSignal s)
    {
       if (Debug.debug) Debug.print(Debug.DEBUG, "Handling incoming signal: "+s);
+      Log.i(TAG, "<<< " + s.getName());
       Vector<DBusSigHandler<? extends DBusSignal>> v = new Vector<DBusSigHandler<? extends DBusSignal>>();
       synchronized(handledSignals) {
          Vector<DBusSigHandler<? extends DBusSignal>> t;
@@ -864,6 +873,7 @@ public abstract class AbstractConnection
    private void handleMessage(final Error err)
    {
       if (Debug.debug) Debug.print(Debug.DEBUG, "Handling incoming error: "+err);
+      Log.e(TAG, ">>> Error: " + err.getName());
       MethodCall m = null;
       if (null == pendingCalls) return;
       synchronized (pendingCalls) {
@@ -937,6 +947,7 @@ public abstract class AbstractConnection
          if (null != cbh) {
             final CallbackHandler fcbh = cbh;
             final DBusAsyncReply fasr = asr;
+            Log.i(TAG, "<<< Reply: " + fasr.getMethod().getName());
             if (Debug.debug) Debug.print(Debug.VERBOSE, "Adding Runnable for method "+fasr.getMethod()+" with callback handler "+fcbh);
             addRunnable(new Runnable() { 
                private boolean run = false;
@@ -950,7 +961,6 @@ public abstract class AbstractConnection
                      synchronized (infomap) {
                         infomap.put(Thread.currentThread(), info);
                      }
-
                      fcbh.handle(RemoteInvocationHandler.convertRV(mr.getSig(), mr.getParameters(), fasr.getMethod(), fasr.getConnection()));
                      synchronized (infomap) {
                         infomap.remove(Thread.currentThread());

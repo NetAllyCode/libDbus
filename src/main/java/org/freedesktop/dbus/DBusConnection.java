@@ -10,6 +10,8 @@
 */
 package org.freedesktop.dbus;
 
+import android.util.Log;
+
 import static org.freedesktop.dbus.Gettext._;
 
 import java.lang.reflect.Proxy;
@@ -51,7 +53,9 @@ import cx.ath.matthew.debug.Debug;
  */
 public class DBusConnection extends AbstractConnection
 {
-	/**
+    public static final String TAG = "DBusConnection";
+
+    /**
 	 * Add addresses of peers to a set which will watch for them to
 	 * disappear and automatically remove them from the set.
 	 */
@@ -732,6 +736,7 @@ public class DBusConnection extends AbstractConnection
    protected <T extends DBusSignal> void addSigHandler(DBusMatchRule rule, DBusSigHandler<T> handler) throws DBusException
    {
       try {
+          Log.i(TAG, "AddMatch: " + rule.toString());
          _dbus.AddMatch(rule.toString());
       } catch (DBusExecutionException DBEe) {
          if (EXCEPTION_DEBUG && Debug.debug) Debug.print(Debug.ERR, DBEe);
