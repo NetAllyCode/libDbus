@@ -37,6 +37,14 @@ public class DBusMatchRule
       this.iface = iface;
       this.member = member;
    }
+
+    public DBusMatchRule(String type, String iface, String member, Class<? extends DBusSignal> c) {
+      this.type = type;
+      this.iface = iface;
+      this.member = member;
+      signalTypeMap.put(iface + '$' + member, c);
+   }
+
    public DBusMatchRule(DBusExecutionException e) throws DBusException
    {
       this(e.getClass());
