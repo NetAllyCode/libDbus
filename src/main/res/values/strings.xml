@@ -1,3 +1,3 @@
 <resources>
-    <string name="app_name">LibDbus</string>
+    <string name="common_appName">LibDbus</string>
 </resources>
