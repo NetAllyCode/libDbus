@@ -135,21 +135,21 @@ public class DBusSignal extends Message
       if (Debug.debug) Debug.print(Debug.DEBUG, "Converting signal to type: "+c);
       Type[] types = typeCache.get(c);
       Constructor<? extends DBusSignal> con = conCache.get(c);
-      if (null == types) {
-         con = (Constructor<? extends DBusSignal>) c.getDeclaredConstructors()[0];
-         conCache.put(c, con);
-         Type[] ts = con.getGenericParameterTypes();
-         types = new Type[ts.length-1];
-         for (int i = 1; i < ts.length; i++)
-            if (ts[i] instanceof TypeVariable)
-               for (Type b: ((TypeVariable<GenericDeclaration>) ts[i]).getBounds())
-                  types[i-1] = b;
-            else
-               types[i-1] = ts[i];
-         typeCache.put(c, types);
-      }
+       try {
+         if (null == types) {
+            con = (Constructor<? extends DBusSignal>) c.getDeclaredConstructors()[0];
+            conCache.put(c, con);
+            Type[] ts = con.getGenericParameterTypes();
+            types = new Type[ts.length-1];
+            for (int i = 1; i < ts.length; i++)
+               if (ts[i] instanceof TypeVariable)
+                  for (Type b: ((TypeVariable<GenericDeclaration>) ts[i]).getBounds())
+                     types[i-1] = b;
+               else
+                  types[i-1] = ts[i];
+            typeCache.put(c, types);
+         }
 
-      try {
          DBusSignal s;
          Object[] args = Marshalling.deSerializeParameters(getParameters(), types, conn);
          if (null == args) s = (DBusSignal) con.newInstance(getPath());

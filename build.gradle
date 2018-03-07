@@ -2,18 +2,19 @@ buildscript {
     repositories {
         jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://maven.google.com' }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.1'
     }
 }
 
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.2'
 
     repositories {
         jcenter()
@@ -21,8 +22,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 25
-        targetSdkVersion 25
+        minSdkVersion 24
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
     }
@@ -40,8 +41,6 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'org.abstractj.libmatthew:hexdump:0.2.1'
-    testCompile 'junit:junit:4.12'
+    implementation 'org.abstractj.libmatthew:hexdump:0.2.1'
 }
 
