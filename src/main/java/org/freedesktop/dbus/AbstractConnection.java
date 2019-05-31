@@ -199,7 +199,6 @@ public abstract class AbstractConnection
             }
             if (null != m) {
                sendMessage(m);
-               Log.v(TAG, ">>> " + m.getName());
             }
 
             m = null;
@@ -830,7 +829,6 @@ public abstract class AbstractConnection
    private void handleMessage(final DBusSignal s)
    {
       if (Debug.debug) Debug.print(Debug.DEBUG, "Handling incoming signal: "+s);
-      Log.v(TAG, "<<< " + s.getName());
       Vector<DBusSigHandler<? extends DBusSignal>> v = new Vector<DBusSigHandler<? extends DBusSignal>>();
       synchronized(handledSignals) {
          Vector<DBusSigHandler<? extends DBusSignal>> t;
